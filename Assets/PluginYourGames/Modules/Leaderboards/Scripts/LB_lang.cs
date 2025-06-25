@@ -5,7 +5,7 @@ namespace YG.Insides
     {
 #if RU_YG2
         public const string t_nameLB = "Техническое название соревновательной таблицы";
-        public const string t_maxQuantityPlayers = "Техническое название соревновательной таблицы";
+        public const string t_maxQuantityPlayers = "Максимальное количество игроков в таблице";
         public const string t_quantityTop = "Кол-во получения верхних топ игроков";
         public const string t_quantityAround = "Кол-во получения верхних топ игроков";
         public const string t_updateLBMethod = "Когда следует обновлять лидерборд?\nStart - Обновлять в методе Start.\nOnEnable - Обновлять при каждой активации объекта (в методе OnEnable)\nDoNotUpdate - Не обновлять лидерборд с помощью данного скрипта (подразоумивается, что метод обновления 'UpdateLB' вы будете запускать сами, когда вам потребуется.";
@@ -19,7 +19,7 @@ namespace YG.Insides
         public const string t_decimalSize = "Размер десятичной части счёта (при использовании Time type).\n  Например:\n  0 = 00:00\n  1 = 00:00.0\n  2 = 00:00.00\n  3 = 00:00.000\nВы можете проверить это в Unity не прибегая к тестированию в сборке.";
 #else
         public const string t_nameLB = "Technical name of the competition table";
-        public const string t_maxQuantityPlayers = "The maximum number of players received";
+        public const string t_maxQuantityPlayers = "The maximum number of players in the table";
         public const string t_quantityTop = "Number of top players to receive";
         public const string t_quantityAround = "Number of records received near the user";
         public const string t_updateLBMethod = "When should the leaderboard be updated?\nStart - Update in the Start method.\nOnEnable - Update each time the object is activated (in the OnEnable method)\nDoNotUpdate - Do not update the leaderboard using this script (it is assumed that you will run the 'UpdateLB' update method yourself when you need it.";

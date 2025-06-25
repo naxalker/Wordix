@@ -1,5 +1,8 @@
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 using Zenject;
 
@@ -16,6 +19,8 @@ public class StatisticPanel : MonoBehaviour
 
     [SerializeField] private Button _returnButton;
 
+    [SerializeField] private LocalizedString _totalGamesPlayedString;
+
     private PlayerStatistic _playerStatistic;
 
     [Inject]
@@ -27,6 +32,7 @@ public class StatisticPanel : MonoBehaviour
     private void OnEnable()
     {
         _playerStatistic.OnTotalTimeValueChanged += TotalTimeValueChangedHandler;
+        LocalizationSettings.SelectedLocaleChanged += LocaleChangedHandler;
     }
 
     private void Start()
@@ -37,13 +43,14 @@ public class StatisticPanel : MonoBehaviour
     private void OnDisable()
     {
         _playerStatistic.OnTotalTimeValueChanged -= TotalTimeValueChangedHandler;
+        LocalizationSettings.SelectedLocaleChanged -= LocaleChangedHandler;
     }
 
-    public void Show()
+    public async void Show()
     {
         gameObject.SetActive(true);
 
-        _totalGamesPlayedText.text = GetPlayedGamesText(_playerStatistic.TotalGamesPlayed);
+        _totalGamesPlayedText.text = await GetPlayedGamesText(_playerStatistic.TotalGamesPlayed);
         _totalWinsText.text = _playerStatistic.TotalWins.ToString();
 
         if (_playerStatistic.TotalGamesPlayed > 0)
@@ -89,6 +96,11 @@ public class StatisticPanel : MonoBehaviour
         _totalTimeText.text = GetFormattedTime(time);
     }
 
+    private async void LocaleChangedHandler(Locale locale)
+    {
+        _totalGamesPlayedText.text = await GetPlayedGamesText(_playerStatistic.TotalGamesPlayed);
+    }
+
     private string GetFormattedTime(float time)
     {
         int hours = Mathf.FloorToInt(time / 3600);
@@ -101,26 +113,41 @@ public class StatisticPanel : MonoBehaviour
             return $"{minutes:00}:{seconds:00}";
     }
 
-    private string GetPlayedGamesText(int totalGames)
+    private async Task<string> GetPlayedGamesText(int totalGames)
     {
         string gameWord;
 
-        if (totalGames % 100 >= 11 && totalGames % 100 <= 19)
+        if (LocalizationSettings.SelectedLocale.Identifier.Code == "ru")
         {
-            gameWord = "игр";
+            if (totalGames % 100 >= 11 && totalGames % 100 <= 19)
+            {
+                gameWord = "игр";
+            }
+            else
+            {
+                int lastDigit = totalGames % 10;
+
+                if (lastDigit == 1)
+                    gameWord = "игру";
+                else if (lastDigit >= 2 && lastDigit <= 4)
+                    gameWord = "игры";
+                else
+                    gameWord = "игр";
+            }
         }
         else
         {
-            int lastDigit = totalGames % 10;
-
-            if (lastDigit == 1)
-                gameWord = "игру";
-            else if (lastDigit >= 2 && lastDigit <= 4)
-                gameWord = "игры";
-            else
-                gameWord = "игр";
+            gameWord = totalGames > 1 ? "games" : "game";
         }
 
-        return $"Ты сыграл уже - <b>{totalGames} {gameWord}</b>";
+        _totalGamesPlayedString.Arguments = new object[]
+        {
+            totalGames,
+            gameWord
+        };
+
+        var handle = _totalGamesPlayedString.GetLocalizedStringAsync();
+
+        return await handle.Task;
     }
 }

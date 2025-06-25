@@ -26,39 +26,42 @@ public class Board : MonoBehaviour
     private int _columnIndex;
 
     private PlayerInput _playerInput;
-    private WordsController _playerProgress;
+    private WordsController _wordsController;
 
     [Inject]
-    private void Construct(PlayerInput playerInput, WordsController playerProgress)
+    private void Construct(PlayerInput playerInput, WordsController wordsController)
     {
         _playerInput = playerInput;
-        _playerProgress = playerProgress;
+        _wordsController = wordsController;
     }
 
     public string Word => _word;
     public char[] GuessedLettersInWord => _guessedLettersInWord;
 
-    private List<string> UnguessedWords => _playerProgress.UnguessedWords;
-    private string[] ValidWords => _playerProgress.ValidWords;
+    private List<string> UnguessedWords => _wordsController.UnguessedWords;
+    private string[] ValidWords => _wordsController.ValidWords;
 
     private void Awake()
     {
         _rows = GetComponentsInChildren<Row>();
     }
 
-    private void Start()
-    {
-        StartNewGame();
-    }
-
     private void OnEnable()
     {
-        _playerInput.OnKeyPressed += KeyPressedHandler;
+        _playerInput.OnLetterKeyPressed += PlaceLetter;
+        _playerInput.OnClearPressed += RemoveLetter;
+        _playerInput.OnSubmitPressed += SubmitWord;
+
+        _wordsController.OnWordsLoaded += StartNewGame;
     }
 
     private void OnDisable()
     {
-        _playerInput.OnKeyPressed -= KeyPressedHandler;
+        _playerInput.OnLetterKeyPressed -= PlaceLetter;
+        _playerInput.OnClearPressed -= RemoveLetter;
+        _playerInput.OnSubmitPressed -= SubmitWord;
+
+        _wordsController.OnWordsLoaded -= StartNewGame;
     }
 
     public void StartNewGame()
@@ -220,22 +223,6 @@ public class Board : MonoBehaviour
 
         _rowIndex = 0;
         _columnIndex = 0;
-    }
-
-    private void KeyPressedHandler(KeyCode keyCode)
-    {
-        if (keyCode == KeyCode.Return)
-        {
-            SubmitWord();
-        }
-        else if (keyCode == KeyCode.Backspace)
-        {
-            RemoveLetter();
-        }
-        else
-        {
-            PlaceLetter(PlayerInput.ENGLISH_TO_RUSSIAN_MAP[keyCode]);
-        }
     }
 
     private bool IsValidWord(string word) => ValidWords.Contains(word);

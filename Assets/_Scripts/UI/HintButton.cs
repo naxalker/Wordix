@@ -25,7 +25,8 @@ public class HintButton : MonoBehaviour
         {
             if (transform.GetChild(i).TryGetComponent(out Image image))
             {
-                image.color = _button.colors.normalColor;
+                image.color =
+                    GetComponent<Image>().color * _button.colors.normalColor;
             }
         }
     }
@@ -38,7 +39,8 @@ public class HintButton : MonoBehaviour
         {
             if (transform.GetChild(i).TryGetComponent(out Image image))
             {
-                image.color = _button.colors.disabledColor;
+                image.color =
+                    GetComponent<Image>().color * _button.colors.disabledColor;
             }
         }
     }

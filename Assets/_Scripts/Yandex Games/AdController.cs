@@ -26,24 +26,25 @@ public class AdController : IInitializable, IDisposable
         _board.OnNewGameStarted -= NewGameStartedHandler;
     }
 
+#if GameMonetizePlatform_yg
+    private void ShowRewAd()
+    {
+        _messagePanel.ShowHintMessage();
+
+        _hintButton.Disable();
+    }
+#else
     private void ShowRewAd()
     {
         YG2.RewardedAdvShow("giveHint", () =>
         {
-            string[] positions = { "Первая", "Вторая", "Третья", "Четвертая", "Пятая" };
-
-            for (int i = 0; i < _board.GuessedLettersInWord.Length; i++)
-            {
-                if (_board.GuessedLettersInWord[i] == '\0')
-                {
-                    _messagePanel.ShowMessage($"{positions[i]} буква - <color=#538D4E><b>{char.ToUpper(_board.Word[i])}</b></color>");
-                    break;
-                }
-            }
+            _messagePanel.ShowHintMessage();
 
             _hintButton.Disable();
         });
     }
+#endif
+
 
     private void NewGameStartedHandler()
     {

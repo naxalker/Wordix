@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: MainTable Shared Data
+  m_EditorClassIdentifier: 
+  m_TableCollectionName: MainTable
+  m_TableCollectionNameGuidString: 69ff9bbcfaf597146b90c13f0b24bb86
+  m_Entries:
+  - m_Id: 79741142175744
+    m_Key: guessedWordsLabel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 91732409847808
+    m_Key: message.victory1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 92041802682368
+    m_Key: message.victory2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 92093296152576
+    m_Key: message.victory3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 92161814302720
+    m_Key: message.victory4
+    m_Metadata:
+      m_Items: []
+  - m_Id: 92221918679040
+    m_Key: message.victory5
+    m_Metadata:
+      m_Items: []
+  - m_Id: 92328554663936
+    m_Key: message.invalidWord
+    m_Metadata:
+      m_Items: []
+  - m_Id: 92853215956992
+    m_Key: message.gameOver
+    m_Metadata:
+      m_Items: []
+  - m_Id: 96249184522240
+    m_Key: button.nextWord
+    m_Metadata:
+      m_Items: []
+  - m_Id: 163394371194880
+    m_Key: message.hint
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 1428788399202107679
+  references:
+    version: 2
+    RefIds:
+    - rid: 1428788399202107679
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1750659465374

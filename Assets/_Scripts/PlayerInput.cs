@@ -1,115 +1,177 @@
 using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using Zenject;
 
 public class PlayerInput : IInitializable, ITickable, IDisposable
 {
-    public static readonly Dictionary<KeyCode, char> ENGLISH_TO_RUSSIAN_MAP = new Dictionary<KeyCode, char>()
+    private static readonly Dictionary<KeyCode, char> ENGLISH_TO_RUSSIAN_MAP = new Dictionary<KeyCode, char>()
     {
-        { KeyCode.A, 'Ù' }, { KeyCode.B, 'Ë' }, { KeyCode.C, 'Ò' },
-        { KeyCode.D, '‚' }, { KeyCode.E, 'Û' }, { KeyCode.F, '‡' },
-        { KeyCode.G, 'Ô' }, { KeyCode.H, '' }, { KeyCode.I, '¯' },
-        { KeyCode.J, 'Ó' }, { KeyCode.K, 'Î' }, { KeyCode.L, '‰' },
-        { KeyCode.M, '¸' }, { KeyCode.N, 'Ú' }, { KeyCode.O, '˘' },
-        { KeyCode.P, 'Á' }, { KeyCode.Q, 'È' }, { KeyCode.R, 'Í' },
-        { KeyCode.S, '˚' }, { KeyCode.T, 'Â' }, { KeyCode.U, '„' },
-        { KeyCode.V, 'Ï' }, { KeyCode.W, 'ˆ' }, { KeyCode.X, '˜' },
-        { KeyCode.Y, 'Ì' }, { KeyCode.Z, 'ˇ' }, { KeyCode.LeftBracket, 'ı' },
-        { KeyCode.RightBracket, '˙' }, { KeyCode.Semicolon, 'Ê' },
-        { KeyCode.Quote, '˝' }, { KeyCode.Comma, '·' }, { KeyCode.Period, '˛' }
+        { KeyCode.A, '—Ñ' }, { KeyCode.B, '–∏' }, { KeyCode.C, '—Å' },
+        { KeyCode.D, '–≤' }, { KeyCode.E, '—É' }, { KeyCode.F, '–∞' },
+        { KeyCode.G, '–ø' }, { KeyCode.H, '—Ä' }, { KeyCode.I, '—à' },
+        { KeyCode.J, '–æ' }, { KeyCode.K, '–ª' }, { KeyCode.L, '–¥' },
+        { KeyCode.M, '—å' }, { KeyCode.N, '—Ç' }, { KeyCode.O, '—â' },
+        { KeyCode.P, '–∑' }, { KeyCode.Q, '–π' }, { KeyCode.R, '–∫' },
+        { KeyCode.S, '—ã' }, { KeyCode.T, '–µ' }, { KeyCode.U, '–≥' },
+        { KeyCode.V, '–º' }, { KeyCode.W, '—Ü' }, { KeyCode.X, '—á' },
+        { KeyCode.Y, '–Ω' }, { KeyCode.Z, '—è' }, { KeyCode.LeftBracket, '—Ö' },
+        { KeyCode.RightBracket, '—ä' }, { KeyCode.Semicolon, '–∂' },
+        { KeyCode.Quote, '—ç' }, { KeyCode.Comma, '–±' }, { KeyCode.Period, '—é' }
     };
 
-    private static readonly KeyCode[] SUPPORTED_KEYS = new KeyCode[]
+    private static readonly KeyCode[] SUPPORTED_KEYS_RU = new KeyCode[]
     {
         KeyCode.A, KeyCode.B, KeyCode.C, KeyCode.D, KeyCode.E, KeyCode.F,
         KeyCode.G, KeyCode.H, KeyCode.I, KeyCode.J, KeyCode.K, KeyCode.L,
         KeyCode.M, KeyCode.N, KeyCode.O, KeyCode.P, KeyCode.Q, KeyCode.R,
         KeyCode.S, KeyCode.T, KeyCode.U, KeyCode.V, KeyCode.W, KeyCode.X,
-        KeyCode.Y, KeyCode.Z, KeyCode.LeftBracket, KeyCode.RightBracket, 
-        KeyCode.Semicolon, KeyCode.Quote, KeyCode.Comma, KeyCode.Period,
-        KeyCode.Backspace, KeyCode.Return
+        KeyCode.Y, KeyCode.Z, KeyCode.LeftBracket, KeyCode.RightBracket,
+        KeyCode.Semicolon, KeyCode.Quote, KeyCode.Comma, KeyCode.Period
     };
 
-    public event Action<KeyCode> OnKeyPressed;
-    public event Action OnButtonPressed;
+    private static readonly KeyCode[] SUPPORTED_KEYS_EN = new KeyCode[]
+    {
+        KeyCode.A, KeyCode.B, KeyCode.C, KeyCode.D, KeyCode.E, KeyCode.F,
+        KeyCode.G, KeyCode.H, KeyCode.I, KeyCode.J, KeyCode.K, KeyCode.L,
+        KeyCode.M, KeyCode.N, KeyCode.O, KeyCode.P, KeyCode.Q, KeyCode.R,
+        KeyCode.S, KeyCode.T, KeyCode.U, KeyCode.V, KeyCode.W, KeyCode.X,
+        KeyCode.Y, KeyCode.Z
+    };
+
+    public event Action<char> OnLetterKeyPressed;
+    public event Action OnClearPressed;
+    public event Action OnSubmitPressed;
+
+    private KeyCode[] _supportedKeys = SUPPORTED_KEYS_RU;
+    private VirtualKeyboard _activeKeyboard;
 
     private Board _board;
-    private Button[] _letterButtons;
-    private Button _clearButton;
-    private Button _submitButton;
+    private VirtualKeyboard _keyboardRU;
+    private VirtualKeyboard _keyboardEN;
 
-    private Dictionary<char, Button> _letterToButton = new Dictionary<char, Button>();
-
-    public PlayerInput(Board board, Button[] letterButtons, Button clearButton, Button submitButton)
+    public PlayerInput(
+        Board board,
+        VirtualKeyboard keyboardRU,
+        VirtualKeyboard keyboardEN)
     {
         _board = board;
-        _letterButtons = letterButtons;
-        _clearButton = clearButton;
-        _submitButton = submitButton;
+        _keyboardRU = keyboardRU;
+        _keyboardEN = keyboardEN;
     }
 
     public void Initialize()
     {
-        foreach (Button button in _letterButtons)
-        {
-            char letter = button.GetComponentInChildren<TMP_Text>().text[0];
-            _letterToButton[letter] = button;
-            button.onClick.AddListener(() =>
-            {
-                _board.PlaceLetter(letter);
-                OnButtonPressed?.Invoke();
-            });
-        }
+        SetActiveKeyboard(LocalizationSettings.SelectedLocale);
 
-        _clearButton.onClick.AddListener(() => _board.RemoveLetter());
-        _submitButton.onClick.AddListener(() => _board.SubmitWord());
+        _keyboardRU.OnKeyPressed += LetterKeyPressedHandler;
+        _keyboardRU.OnClearPressed += ClearPressedHandler;
+        _keyboardRU.OnSubmitPressed += SubmitPressedHandler;
+
+        _keyboardEN.OnKeyPressed += LetterKeyPressedHandler;
+        _keyboardEN.OnClearPressed += ClearPressedHandler;
+        _keyboardEN.OnSubmitPressed += SubmitPressedHandler;
+
         Tile.OnTileChangedState += TileChangedStateHandler;
         _board.OnNewGameStarted += NewGameStartedHandler;
+
+        LocalizationSettings.SelectedLocaleChanged += LocaleChangedHandler;
     }
 
     public void Dispose()
     {
         Tile.OnTileChangedState -= TileChangedStateHandler;
         _board.OnNewGameStarted -= NewGameStartedHandler;
+
+        _keyboardRU.OnKeyPressed -= LetterKeyPressedHandler;
+        _keyboardRU.OnClearPressed -= ClearPressedHandler;
+        _keyboardRU.OnSubmitPressed -= SubmitPressedHandler;
+
+        _keyboardEN.OnKeyPressed -= LetterKeyPressedHandler;
+        _keyboardEN.OnClearPressed -= ClearPressedHandler;
+        _keyboardEN.OnSubmitPressed -= SubmitPressedHandler;
+
+        LocalizationSettings.SelectedLocaleChanged -= LocaleChangedHandler;
     }
 
     public void Tick()
     {
-        foreach (KeyCode keyCode in SUPPORTED_KEYS)
+        if (Input.GetKeyDown(KeyCode.Backspace))
         {
-            if (Input.GetKeyDown(keyCode))
+            OnClearPressed?.Invoke();
+        }
+        else if (Input.GetKeyDown(KeyCode.Return))
+        {
+            OnSubmitPressed?.Invoke();
+        }
+        else
+        {
+            foreach (KeyCode keyCode in _supportedKeys)
             {
-                OnKeyPressed?.Invoke(keyCode);
+                if (Input.GetKeyDown(keyCode))
+                {
+                    if (LocalizationSettings.SelectedLocale.Identifier.Code == "ru")
+                    {
+                        char letter = ENGLISH_TO_RUSSIAN_MAP[keyCode];
+                        OnLetterKeyPressed?.Invoke(letter);
+                    }
+                    else
+                    {
+                        char letter = keyCode.ToString().ToLower()[0];
+                        OnLetterKeyPressed?.Invoke(letter);
+                    }
+                }
             }
         }
+    }
+
+    private void LetterKeyPressedHandler(char letter)
+    {
+        OnLetterKeyPressed?.Invoke(letter);
+    }
+
+    private void SubmitPressedHandler()
+    {
+        OnSubmitPressed?.Invoke();
+    }
+
+    private void ClearPressedHandler()
+    {
+        OnClearPressed?.Invoke();
     }
 
     private void TileChangedStateHandler(Tile tile)
     {
-        if (tile.State == TileState.EmptyState || tile.State == TileState.OccupiedState) { return; }
-        
-        Button letterButton = _letterToButton[tile.Letter];
-
-        if (letterButton.TryGetComponent(out KeyboardButton keyboardButton))
-        {
-            if (tile.State == TileState.CorrectState || keyboardButton.ColorHasChanged == false)
-            {
-                keyboardButton.ChangeColor(tile.FillColor);
-            }
-        }
+        _activeKeyboard.ChangeKeyColor(tile);
     }
 
     private void NewGameStartedHandler()
     {
-        foreach (Button button in _letterButtons)
+        _activeKeyboard.ResetButtons();
+    }
+
+    private void LocaleChangedHandler(Locale locale)
+    {
+        SetActiveKeyboard(locale);
+    }
+
+    private void SetActiveKeyboard(Locale locale)
+    {
+        if (locale.Identifier.Code == "ru")
         {
-            if (button.TryGetComponent(out KeyboardButton keyboardButton))
-            {
-                keyboardButton.ResetButton();
-            }
+            _supportedKeys = SUPPORTED_KEYS_RU;
+            _activeKeyboard = _keyboardRU;
+            _keyboardRU.gameObject.SetActive(true);
+            _keyboardEN.gameObject.SetActive(false);
+        }
+        else
+        {
+            _supportedKeys = SUPPORTED_KEYS_EN;
+            _activeKeyboard = _keyboardEN;
+            _keyboardRU.gameObject.SetActive(false);
+            _keyboardEN.gameObject.SetActive(true);
         }
     }
 }

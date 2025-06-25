@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 using Zenject;
 
@@ -15,6 +17,7 @@ public class Header : MonoBehaviour
 
     [Header("Progress Text")]
     [SerializeField] private TMP_Text _progressText;
+    [SerializeField] private LocalizedString _progressTextLocalized;
 
     [Header("Settings")]
     [SerializeField] private Button _settingsButton;
@@ -23,30 +26,52 @@ public class Header : MonoBehaviour
     [Header("Other References")]
     [SerializeField] private Board _board;
 
-    private WordsController _playerProgress;
+    private WordsController _wordsController;
 
     [Inject]
-    private void Construct(WordsController playerProgress)
+    private void Construct(WordsController wordsController)
     {
-        _playerProgress = playerProgress;
+        _wordsController = wordsController;
     }
 
     private void Start()
     {
+        RefreshProgressText();
+
         _board.OnNewGameStarted += NewGameStartedHandler;
 
         _helpButton.onClick.AddListener(() => _helpPanel.Show());
         _statButton.onClick.AddListener(() => _statisticPanel.Show());
         _settingsButton.onClick.AddListener(() => _settingsPanel.gameObject.SetActive(true));
+
+        LocalizationSettings.SelectedLocaleChanged += LocaleChangedHandler;
     }
 
     private void OnDestroy()
     {
         _board.OnNewGameStarted -= NewGameStartedHandler;
+        LocalizationSettings.SelectedLocaleChanged -= LocaleChangedHandler;
     }
 
     private void NewGameStartedHandler()
     {
-        _progressText.text = $"Слов отгадано\n{_playerProgress.GuessedWordsAmount}/{WordsController.WORDS_TO_GUESS_AMOUNT}";
+        RefreshProgressText();
+    }
+
+    private void LocaleChangedHandler(Locale locale)
+    {
+        RefreshProgressText();
+    }
+
+    private async void RefreshProgressText()
+    {
+        _progressTextLocalized.Arguments = new object[] {
+            _wordsController.GuessedWordsAmount,
+            WordsController.WORDS_TO_GUESS_AMOUNT
+        };
+
+        var handle = _progressTextLocalized.GetLocalizedStringAsync();
+        string localizedString = await handle.Task;
+        _progressText.text = localizedString;
     }
 }

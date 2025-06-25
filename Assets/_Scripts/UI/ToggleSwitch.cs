@@ -20,11 +20,25 @@ public class ToggleSwitch : MonoBehaviour, IPointerClickHandler
     private Slider _slider;
     private Coroutine _animateSliderCoroutine;
 
+    public void Setup(float sliderValue)
+    {
+        SetupSliderComponent();
+
+        _sliderValue = Mathf.Clamp01(sliderValue);
+        _slider.value = _sliderValue;
+        _currentValue = _sliderValue > 0.5f;
+    }
+
     protected virtual void OnValidate()
     {
         SetupToggleComponents();
 
         _slider.value = _sliderValue;
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        Toggle();
     }
 
     private void SetupToggleComponents()
@@ -50,17 +64,6 @@ public class ToggleSwitch : MonoBehaviour, IPointerClickHandler
         sliderColors.disabledColor = Color.white;
         _slider.colors = sliderColors;
         _slider.transition = Selectable.Transition.None;
-    }
-
-
-    protected virtual void Awake()
-    {
-        SetupSliderComponent();
-    }
-
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        Toggle();
     }
 
     private void Toggle()

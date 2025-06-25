@@ -143,7 +143,8 @@ PlayerSettings:
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
   bundleVersion: 1.0.3
-  preloadedAssets: []
+  preloadedAssets:
+  - {fileID: 11400000, guid: cd679df6a286a2f4b9ab63f2a77ba202, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -680,17 +681,17 @@ PlayerSettings:
   blurSplashScreenBackground: 1
   spritePackerPolicy: 
   webGLMemorySize: 32
-  webGLExceptionSupport: 2
+  webGLExceptionSupport: 1
   webGLNameFilesAsHashes: 1
   webGLShowDiagnostics: 0
   webGLDataCaching: 1
   webGLDebugSymbols: 0
   webGLEmscriptenArgs: 
   webGLModulesDirectory: 
-  webGLTemplate: PROJECT:YandexGames
+  webGLTemplate: PROJECT:GameMonetize
   webGLAnalyzeBuildSize: 0
   webGLUseEmbeddedResources: 0
-  webGLCompressionFormat: 0
+  webGLCompressionFormat: 2
   webGLWasmArithmeticExceptions: 0
   webGLLinkerTarget: 1
   webGLThreadsSupport: 0
@@ -720,7 +721,7 @@ PlayerSettings:
     Stadia: DOTWEEN
     Standalone: DOTWEEN;PLUGIN_YG_2;YandexGamesPlatform_yg;Authorization_yg;InterstitialAdv_yg;Leaderboards_yg;RedefinePlayerPrefs_yg;Storage_yg;TMP_YG2;RewardedAdv_yg;EnvirData_yg;OpenURL_yg
     VisionOS: DOTWEEN
-    WebGL: DOTWEEN;PLUGIN_YG_2;TMP_YG2;InterstitialAdv_yg;Storage_yg;Authorization_yg;RedefinePlayerPrefs_yg;Leaderboards_yg;EnvirData_yg;OpenURL_yg;RewardedAdv_yg;YandexGamesPlatform_yg
+    WebGL: DOTWEEN;PLUGIN_YG_2;TMP_YG2;InterstitialAdv_yg;Storage_yg;Authorization_yg;RedefinePlayerPrefs_yg;Leaderboards_yg;EnvirData_yg;OpenURL_yg;RewardedAdv_yg;NJSON_YG2;GameMonetizePlatform_yg
     Windows Store Apps: DOTWEEN
     XboxOne: DOTWEEN
     iPhone: DOTWEEN

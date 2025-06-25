@@ -2,15 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using Zenject;
 using PlayerPrefs = RedefineYG.PlayerPrefs;
 
 public class WordsController : IInitializable, IDisposable
 {
-    public static readonly int WORDS_TO_GUESS_AMOUNT = 1000;
-    private const string UNGUESSED_WORDS_KEY = "UnguessedWords";
+    public event Action OnAllWordsGuessed;
+    public event Action OnWordsLoaded;
 
-    public Action OnAllWordsGuessed;
+    public static readonly int WORDS_TO_GUESS_AMOUNT = 1000;
+    private const string UNGUESSED_WORDS_RU_KEY = "UnguessedWords";
+    private const string UNGUESSED_WORDS_EN_KEY = "UnguessedWordsEN";
 
     private List<string> _unguessedWords;
     private string[] _validWords;
@@ -29,22 +33,18 @@ public class WordsController : IInitializable, IDisposable
     public void Initialize()
     {
         LoadValidWords();
+        LoadUnguessedWords();
 
-        if (PlayerPrefs.HasKey(UNGUESSED_WORDS_KEY))
-        {
-            _unguessedWords = LoadProgress();
-        }
-        else
-        {
-            _unguessedWords = _validWords.Take(WORDS_TO_GUESS_AMOUNT).ToList();
-        }
+        OnWordsLoaded?.Invoke();
 
         _board.OnGameOver += GameOverHandler;
+        LocalizationSettings.SelectedLocaleChanged += LocaleChangedHandler;
     }
 
     public void Dispose()
     {
         _board.OnGameOver -= GameOverHandler;
+        LocalizationSettings.SelectedLocaleChanged -= LocaleChangedHandler;
     }
 
     public void ResetProgress()
@@ -70,9 +70,18 @@ public class WordsController : IInitializable, IDisposable
         }
     }
 
+    private void LocaleChangedHandler(Locale locale)
+    {
+        LoadValidWords();
+        LoadUnguessedWords();
+
+        OnWordsLoaded?.Invoke();
+    }
+
     private void LoadValidWords()
     {
-        TextAsset textFile = Resources.Load("words") as TextAsset;
+        string currentLocale = LocalizationSettings.SelectedLocale.Identifier.Code;
+        TextAsset textFile = Resources.Load($"words_{currentLocale}") as TextAsset;
 
         _validWords = textFile.text
             .Split('\n')
@@ -80,17 +89,35 @@ public class WordsController : IInitializable, IDisposable
             .ToArray();
     }
 
+    private void LoadUnguessedWords()
+    {
+        string currentLocale = LocalizationSettings.SelectedLocale.Identifier.Code;
+        string UNGUESSED_WORDS_KEY = currentLocale == "ru" ?
+                                    UNGUESSED_WORDS_RU_KEY :
+                                    UNGUESSED_WORDS_EN_KEY;
+
+        if (PlayerPrefs.HasKey(UNGUESSED_WORDS_KEY))
+        {
+            string savedString = PlayerPrefs.GetString(UNGUESSED_WORDS_KEY);
+
+            _unguessedWords = savedString.Split(',').ToList();
+        }
+        else
+        {
+            _unguessedWords = _validWords.Take(WORDS_TO_GUESS_AMOUNT).ToList();
+            SaveProgress();
+        }
+    }
+
     private void SaveProgress()
     {
+        string currentLocale = LocalizationSettings.SelectedLocale.Identifier.Code;
+        string UNGUESSED_WORDS_KEY = currentLocale == "ru" ?
+                                    UNGUESSED_WORDS_RU_KEY :
+                                    UNGUESSED_WORDS_EN_KEY;
+
         string joinedString = string.Join(",", _unguessedWords.ToArray());
         PlayerPrefs.SetString(UNGUESSED_WORDS_KEY, joinedString);
         PlayerPrefs.Save();
-    }
-
-    private List<string> LoadProgress()
-    {
-        string savedString = PlayerPrefs.GetString(UNGUESSED_WORDS_KEY);
-
-        return savedString.Split(',').ToList();
     }
 }
