@@ -1,21 +1,21 @@
-# 🟩 5 Букв
+# 🟩 Wordix
 
-![Обложка игры](Resources/Cover.png)
+![Cover](Resources/Cover.png)
 
-**5 Букв** — это Wordle-подобная игра, в которой игрокам предстоит угадывать слова за ограниченное количество попыток. Игра тренирует логику, память и словарный запас.
+**Wordix** is a Wordle-like game where players have to guess words within a limited number of attempts. The game helps improve logic, memory, and vocabulary.
 
-## 🔗 Сыграть на Яндекс Играх
+## 🔗 Play on Yandex Games
 
-👉 [Играть сейчас](https://yandex.ru/games/app/396630?lang=ru)  
+👉 [Play Now](https://yandex.ru/games/app/396630?lang=en)  
 
-## 🖼️ Геймплей
+## 🖼️ Gameplay
 
-![Геймплей 5 Букв](Resources/Preview.gif)
+![Gameplay](Resources/Preview.gif)
 
-## ⚙️ Инструменты
+## ⚙️ Technologies
 
 - **Unity (WebGL)**
 - **C#**
 - **Zenject**
 - **DOTween**
-- **PluginYourGames** - для подключения к Яндекс Играм и монетизации
+- **PluginYourGames** - used for Yandex Games integration and monetization.
