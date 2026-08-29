@@ -74,8 +74,14 @@ crashlytics-build.properties
 .vscode/
 .vsconfig
 /Assets/Animated Loading Icons/
+/Assets/Animated Loading Icons.meta/
 /Assets/Casual Game Sounds U6/
+/Assets/Casual Game Sounds U6.meta/
 /Assets/Confetti FX 2/
+/Assets/Confetti FX 2.meta/
 /Assets/PluginYourGames/
+/Assets/PluginYourGames.meta/
 /Assets/UltimateCleanGUIPack/
+/Assets/UltimateCleanGUIPack.meta/
 /Assets/WebGLTemplates/
+/Assets/WebGLTemplates.meta/
