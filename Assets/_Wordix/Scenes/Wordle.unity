@@ -10790,7 +10790,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u0420\u0443\u0441\u0441\u043A\u0438\u0439"
+  m_text: Russian
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 19a7cee83a98a9b48bfae6d263db6aaa, type: 2}
   m_sharedMaterial: {fileID: 6033663277021841600, guid: 19a7cee83a98a9b48bfae6d263db6aaa, type: 2}

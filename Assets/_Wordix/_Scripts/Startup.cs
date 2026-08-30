@@ -4,7 +4,6 @@ using UnityEngine.Localization.Settings;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.SceneManagement;
-using YG;
 
 public class Startup : MonoBehaviour
 {
@@ -20,9 +19,12 @@ public class Startup : MonoBehaviour
 
     private async void LoadMainScene()
     {
+        PlatformBridge.Service.Initialize();
+        PlatformBridge.Service.GameLoadingStarted();
+
         await LocalizationSettings.InitializationOperation.Task;
 
-        string locale = YG2.envir.language == "ru" ? "ru" : "en";
+        string locale = PlatformBridge.Service.GetLanguage() == "ru" ? "ru" : "en";
         LocalizationSettings.SelectedLocale =
             LocalizationSettings.AvailableLocales.GetLocale(locale);
 
@@ -30,5 +32,7 @@ public class Startup : MonoBehaviour
 
         _loadOperation = Addressables.LoadSceneAsync(_mainSceneReference, LoadSceneMode.Single);
         await _loadOperation.Task;
+
+        PlatformBridge.Service.GameLoadingStopped();
     }
 }

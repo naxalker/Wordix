@@ -1,8 +1,8 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Localization.Settings;
 using Zenject;
-using PlayerPrefs = RedefineYG.PlayerPrefs;
 
 public class SettingsManager : IInitializable, IDisposable
 {
@@ -10,13 +10,19 @@ public class SettingsManager : IInitializable, IDisposable
     private const string THEME_SETTING_KEY = "ThemeChanged";
     private const string LANGUAGE_SETTING_KEY = "LanguageIndex";
 
-    private AudioController _audioController;
-    private Board _board;
-    private SettingsPanel _settingsPanel;
+    private readonly List<string> _settingsKeys = new List<string>
+    {
+        SOUNDS_SETTING_KEY,
+        THEME_SETTING_KEY,
+        LANGUAGE_SETTING_KEY
+    };
 
-    private ThemeController _themeController;
-    private PlayerStatistic _playerStatistic;
-    private WordsController _wordsController;
+    private readonly AudioController _audioController;
+    private readonly Board _board;
+    private readonly SettingsPanel _settingsPanel;
+    private readonly ThemeController _themeController;
+    private readonly PlayerStatistic _playerStatistic;
+    private readonly WordsController _wordsController;
 
     public SettingsManager(
         AudioController audioController,
@@ -55,40 +61,45 @@ public class SettingsManager : IInitializable, IDisposable
 
     private void LoadInitialSettings()
     {
-        bool soundsEnabled = true;
-        bool themeChanged = false;
-        int languageIndex =
-            LocalizationSettings.AvailableLocales.Locales
-                .IndexOf(LocalizationSettings.SelectedLocale);
+        int defaultLanguageIndex = LocalizationSettings.AvailableLocales.Locales
+            .IndexOf(LocalizationSettings.SelectedLocale);
 
-        Debug.Log($"Current language index: {languageIndex}");
-
-        if (PlayerPrefs.HasKey(SOUNDS_SETTING_KEY))
+        PlatformBridge.Service.LoadData(_settingsKeys, (success, values) =>
         {
-            soundsEnabled =
-                PlayerPrefs.GetInt(SOUNDS_SETTING_KEY) == 1;
+            bool soundsEnabled = true;
+            bool themeChanged = false;
+            int languageIndex = defaultLanguageIndex;
 
-            _audioController.ToggleSound(soundsEnabled);
-        }
+            if (success && values != null && values.Count >= _settingsKeys.Count)
+            {
+                // if sound key exists
+                if (values[0] != null)
+                {
+                    soundsEnabled = DataParser.ParseBoolFromInt(values[0], true);
+                    _audioController.ToggleSound(soundsEnabled);
+                }
 
-        if (PlayerPrefs.HasKey(THEME_SETTING_KEY))
-        {
-            themeChanged =
-                PlayerPrefs.GetInt(THEME_SETTING_KEY) == 1;
+                // if theme key exists
+                if (values[1] != null)
+                {
+                    themeChanged = DataParser.ParseBoolFromInt(values[1], false);
+                    if (themeChanged)
+                        _themeController.ChangeColors();
+                }
 
-            if (themeChanged)
-                _themeController.ChangeColors();
-        }
+                // if language key exists
+                if (values[2] != null)
+                {
+                    languageIndex = DataParser.ParseInt(values[2], defaultLanguageIndex);
+                    if (languageIndex >= 0 && languageIndex < LocalizationSettings.AvailableLocales.Locales.Count)
+                    {
+                        LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[languageIndex];
+                    }
+                }
+            }
 
-        if (PlayerPrefs.HasKey(LANGUAGE_SETTING_KEY))
-        {
-            languageIndex = PlayerPrefs.GetInt(LANGUAGE_SETTING_KEY);
-
-            LocalizationSettings.SelectedLocale =
-                LocalizationSettings.AvailableLocales.Locales[languageIndex];
-        }
-
-        _settingsPanel.Setup(soundsEnabled, themeChanged, languageIndex);
+            _settingsPanel.Setup(soundsEnabled, themeChanged, languageIndex);
+        });
     }
 
     private void ResetButtonHandler()
@@ -101,26 +112,19 @@ public class SettingsManager : IInitializable, IDisposable
     private void SoundsToggledHandler(bool isOn)
     {
         _audioController.ToggleSound(isOn);
-
-        PlayerPrefs.SetInt(SOUNDS_SETTING_KEY, isOn ? 1 : 0);
-        PlayerPrefs.Save();
+        PlatformBridge.Service.SaveData(SOUNDS_SETTING_KEY, isOn ? 1 : 0);
     }
 
     private void ThemeToggledHandler(bool isOn)
     {
         _themeController.ChangeColors();
-
-        PlayerPrefs.SetInt(THEME_SETTING_KEY, isOn ? 0 : 1);
-        PlayerPrefs.Save();
+        PlatformBridge.Service.SaveData(THEME_SETTING_KEY, isOn ? 0 : 1);
     }
 
     private void LanguageChangedHandler(int localeIndex)
     {
-        LocalizationSettings.SelectedLocale =
-            LocalizationSettings.AvailableLocales.Locales[localeIndex];
-
-        PlayerPrefs.SetInt(LANGUAGE_SETTING_KEY, localeIndex);
-        PlayerPrefs.Save();
+        LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[localeIndex];
+        PlatformBridge.Service.SaveData(LANGUAGE_SETTING_KEY, localeIndex);
 
         Debug.Log($"Language changed to: {LocalizationSettings.SelectedLocale.LocaleName}");
     }

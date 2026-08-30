@@ -1,5 +1,4 @@
 using System;
-using YG;
 using Zenject;
 
 public class AdController : IInitializable, IDisposable
@@ -17,7 +16,7 @@ public class AdController : IInitializable, IDisposable
 
     public void Initialize()
     {
-        _hintButton.Setup(ShowRewAd);
+        _hintButton.Setup(ShowRewardedAd);
         _board.OnNewGameStarted += NewGameStartedHandler;
     }
 
@@ -26,27 +25,22 @@ public class AdController : IInitializable, IDisposable
         _board.OnNewGameStarted -= NewGameStartedHandler;
     }
 
-    private void ShowRewAd()
+    private void ShowRewardedAd()
     {
-#if GameMonetizePlatform_yg
-        YG2.InterstitialAdvShow();
-
-        _messagePanel.ShowHintMessage();
-
-        _hintButton.Disable();
-#else
-        YG2.RewardedAdvShow("giveHint", () =>
+        PlatformBridge.Service.ShowRewarded(() =>
         {
             _messagePanel.ShowHintMessage();
 
             _hintButton.Disable();
         });
-#endif
+
     }
 
     private void NewGameStartedHandler()
     {
-        _hintButton.Enable();
-        YG2.InterstitialAdvShow();
+        if (PlatformBridge.Service.IsRewardedSupported)
+            _hintButton.Enable();
+
+        PlatformBridge.Service.ShowInterstitial();
     }
 }

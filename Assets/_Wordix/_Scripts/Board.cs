@@ -76,6 +76,8 @@ public class Board : MonoBehaviour
 
         _isActive = true;
 
+        PlatformBridge.Service.LevelStarted();
+
         OnNewGameStarted?.Invoke();
     }
 
@@ -194,6 +196,7 @@ public class Board : MonoBehaviour
 
         if (HasWon(row))
         {
+            PlatformBridge.Service.LevelCompleted();
             OnGameOver?.Invoke(true, _word);
         }
         else
@@ -203,6 +206,7 @@ public class Board : MonoBehaviour
 
             if (_rowIndex >= _rows.Length)
             {
+                PlatformBridge.Service.LevelFailed();
                 OnGameOver?.Invoke(false, _word);
             }
         }

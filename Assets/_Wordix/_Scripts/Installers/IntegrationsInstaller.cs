@@ -1,7 +1,7 @@
 using UnityEngine;
 using Zenject;
 
-public class YandexSDKInstaller : MonoInstaller
+public class IntegrationsInstaller : MonoInstaller
 {
     [SerializeField] private Board _board;
     [SerializeField] private MessagePanel _messagePanel;

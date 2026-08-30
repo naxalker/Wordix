@@ -4,9 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
-using YG;
 using Zenject;
-using PlayerPrefs = RedefineYG.PlayerPrefs;
 
 public class WordsController : IInitializable, IDisposable
 {
@@ -20,7 +18,7 @@ public class WordsController : IInitializable, IDisposable
     private List<string> _unguessedWords;
     private string[] _validWords;
 
-    private Board _board;
+    private readonly Board _board;
 
     public WordsController(Board board)
     {
@@ -29,16 +27,14 @@ public class WordsController : IInitializable, IDisposable
 
     public List<string> UnguessedWords => _unguessedWords;
     public string[] ValidWords => _validWords;
-    public int GuessedWordsAmount => WORDS_TO_GUESS_AMOUNT - _unguessedWords.Count;
+    public int GuessedWordsAmount => WORDS_TO_GUESS_AMOUNT - (_unguessedWords?.Count ?? 0);
 
     public void Initialize()
     {
         LoadValidWords();
         LoadUnguessedWords();
 
-        YG2.GameReadyAPI();
-
-        OnWordsLoaded?.Invoke();
+        PlatformBridge.Service.GameReady();
 
         _board.OnGameOver += GameOverHandler;
         LocalizationSettings.SelectedLocaleChanged += LocaleChangedHandler;
@@ -65,7 +61,6 @@ public class WordsController : IInitializable, IDisposable
             if (_unguessedWords.Count == 0)
             {
                 OnAllWordsGuessed?.Invoke();
-
                 _unguessedWords = _validWords.Take(WORDS_TO_GUESS_AMOUNT).ToList();
             }
 
@@ -77,50 +72,57 @@ public class WordsController : IInitializable, IDisposable
     {
         LoadValidWords();
         LoadUnguessedWords();
-
-        OnWordsLoaded?.Invoke();
     }
 
     private void LoadValidWords()
     {
         string currentLocale = LocalizationSettings.SelectedLocale.Identifier.Code;
-        TextAsset textFile = Resources.Load($"words_{currentLocale}") as TextAsset;
+        TextAsset textFile = Resources.Load<TextAsset>($"words_{currentLocale}");
 
-        _validWords = textFile.text
-            .Split('\n')
-            .Select(word => word.Trim())
-            .ToArray();
+        if (textFile != null)
+        {
+            _validWords = textFile.text
+                .Split('\n')
+                .Select(word => word.Trim())
+                .Where(word => !string.IsNullOrEmpty(word))
+                .ToArray();
+        }
+        else
+        {
+            Debug.LogError($"[WordsController] Words file not found: words_{currentLocale}");
+            _validWords = Array.Empty<string>();
+        }
     }
 
     private void LoadUnguessedWords()
     {
         string currentLocale = LocalizationSettings.SelectedLocale.Identifier.Code;
-        string UNGUESSED_WORDS_KEY = currentLocale == "ru" ?
-                                    UNGUESSED_WORDS_RU_KEY :
-                                    UNGUESSED_WORDS_EN_KEY;
+        string storageKey = currentLocale == "ru" ? UNGUESSED_WORDS_RU_KEY : UNGUESSED_WORDS_EN_KEY;
 
-        if (PlayerPrefs.HasKey(UNGUESSED_WORDS_KEY))
+        PlatformBridge.Service.LoadData(storageKey, (success, savedString) =>
         {
-            string savedString = PlayerPrefs.GetString(UNGUESSED_WORDS_KEY);
+            if (success && !string.IsNullOrEmpty(savedString))
+            {
+                _unguessedWords = savedString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            }
+            else
+            {
+                _unguessedWords = _validWords.Take(WORDS_TO_GUESS_AMOUNT).ToList();
+                SaveProgress();
+            }
 
-            _unguessedWords = savedString.Split(',').ToList();
-        }
-        else
-        {
-            _unguessedWords = _validWords.Take(WORDS_TO_GUESS_AMOUNT).ToList();
-            SaveProgress();
-        }
+            OnWordsLoaded?.Invoke();
+        });
     }
 
     private void SaveProgress()
     {
-        string currentLocale = LocalizationSettings.SelectedLocale.Identifier.Code;
-        string UNGUESSED_WORDS_KEY = currentLocale == "ru" ?
-                                    UNGUESSED_WORDS_RU_KEY :
-                                    UNGUESSED_WORDS_EN_KEY;
+        if (_unguessedWords == null) return;
 
-        string joinedString = string.Join(",", _unguessedWords.ToArray());
-        PlayerPrefs.SetString(UNGUESSED_WORDS_KEY, joinedString);
-        PlayerPrefs.Save();
+        string currentLocale = LocalizationSettings.SelectedLocale.Identifier.Code;
+        string storageKey = currentLocale == "ru" ? UNGUESSED_WORDS_RU_KEY : UNGUESSED_WORDS_EN_KEY;
+
+        string joinedString = string.Join(",", _unguessedWords);
+        PlatformBridge.Service.SaveData(storageKey, joinedString);
     }
 }

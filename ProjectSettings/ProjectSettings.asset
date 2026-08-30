@@ -725,25 +725,25 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Android: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg;GameMonetizePlatform_yg
+    Android: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg
     EmbeddedLinux: DOTWEEN
     GameCoreScarlett: DOTWEEN
     GameCoreXboxOne: DOTWEEN
     Kepler: DOTWEEN
-    LinuxHeadlessSimulation: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg;GameMonetizePlatform_yg
-    Nintendo Switch: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg;GameMonetizePlatform_yg
+    LinuxHeadlessSimulation: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg
+    Nintendo Switch: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg
     Nintendo Switch 2: DOTWEEN
-    PS4: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg;GameMonetizePlatform_yg
-    PS5: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg;GameMonetizePlatform_yg
+    PS4: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg
+    PS5: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg
     QNX: DOTWEEN
     Stadia: DOTWEEN
-    Standalone: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;RedefinePlayerPrefs_yg;TMP_YG2;OpenURL_yg;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg;GameMonetizePlatform_yg
+    Standalone: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;RedefinePlayerPrefs_yg;TMP_YG2;OpenURL_yg;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg
     VisionOS: DOTWEEN
-    WebGL: DOTWEEN;PLUGIN_YG_2;TMP_YG2;RedefinePlayerPrefs_yg;Leaderboards_yg;OpenURL_yg;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg;SENTIS_ANALYTICS_ENABLED;APP_UI_EDITOR_ONLY;GameMonetizePlatform_yg
-    Windows Store Apps: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg;GameMonetizePlatform_yg
-    XboxOne: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg;GameMonetizePlatform_yg
-    iPhone: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg;GameMonetizePlatform_yg
-    tvOS: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg;GameMonetizePlatform_yg
+    WebGL: DOTWEEN;PLUGIN_YG_2;TMP_YG2;RedefinePlayerPrefs_yg;Leaderboards_yg;OpenURL_yg;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg;SENTIS_ANALYTICS_ENABLED;APP_UI_EDITOR_ONLY
+    Windows Store Apps: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg
+    XboxOne: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg
+    iPhone: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg
+    tvOS: DOTWEEN;PLUGIN_YG_2;Leaderboards_yg;OpenURL_yg;RedefinePlayerPrefs_yg;TMP_YG2;NJSON_YG2;Authorization_yg;EnvirData_yg;InterstitialAdv_yg;RewardedAdv_yg;Storage_yg
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}

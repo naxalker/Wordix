@@ -1,12 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using Zenject;
 
-using PlayerPrefs = RedefineYG.PlayerPrefs;
-
 public class PlayerStatistic : IInitializable, ITickable, IDisposable
 {
-    private const float MIN_TIME_BETWEEN_TIME_SAVING = 1f;
+    private const float MIN_TIME_BETWEEN_TIME_SAVING = 15f;
 
     private const string TOTAL_GAMES_PLAYED_KEY = "totalGamesPlayed";
     private const string TOTAL_WINS_KEY = "totalWins";
@@ -16,22 +16,34 @@ public class PlayerStatistic : IInitializable, ITickable, IDisposable
     private const string FASTEST_SOLVE_TIME_KEY = "fastestSolveTime";
     private const string TOTAL_TIME_PLAYED_KEY = "totalTimePlayed";
 
+    private readonly List<string> _statisticKeys = new List<string>
+    {
+        TOTAL_GAMES_PLAYED_KEY,
+        TOTAL_WINS_KEY,
+        CURRENT_WIN_STREAK_KEY,
+        BEST_WIN_STREAK_KEY,
+        TOTAL_ATTEMPTS_KEY,
+        FASTEST_SOLVE_TIME_KEY,
+        TOTAL_TIME_PLAYED_KEY
+    };
+
     public Action<float> OnTotalTimeValueChanged;
     public Action<int> OnTotalWinsValueChanged;
+    public Action OnStatsLoaded;
 
     public int TotalGamesPlayed { get; private set; }
     public int TotalWins { get; private set; }
     public int CurrentWinStreak { get; private set; }
     public int BestWinStreak { get; private set; }
     public int TotalAttempts { get; private set; }
-    public float FastestSolveTime { get; private set; }
+    public float FastestSolveTime { get; private set; } = Mathf.Infinity;
     public float TotalTimePlayed { get; private set; }
 
     private int _currentAttempts = 0;
     private float _currentSessionTime = 0f;
     private float _totalTimeSavingTimer;
 
-    private Board _board;
+    private readonly Board _board;
 
     public PlayerStatistic(Board board)
     {
@@ -40,19 +52,13 @@ public class PlayerStatistic : IInitializable, ITickable, IDisposable
 
     public void Initialize()
     {
-        TotalGamesPlayed = PlayerPrefs.GetInt(TOTAL_GAMES_PLAYED_KEY, 0);
-        TotalWins = PlayerPrefs.GetInt(TOTAL_WINS_KEY, 0);
-        CurrentWinStreak = PlayerPrefs.GetInt(CURRENT_WIN_STREAK_KEY, 0);
-        BestWinStreak = PlayerPrefs.GetInt(BEST_WIN_STREAK_KEY, 0);
-        TotalAttempts = PlayerPrefs.GetInt(TOTAL_ATTEMPTS_KEY, 0);
-        FastestSolveTime = PlayerPrefs.GetFloat(FASTEST_SOLVE_TIME_KEY, Mathf.Infinity);
-        TotalTimePlayed = PlayerPrefs.GetFloat(TOTAL_TIME_PLAYED_KEY, 0f);
-
         _totalTimeSavingTimer = MIN_TIME_BETWEEN_TIME_SAVING;
 
         _board.OnGameOver += GameOverHandler;
         _board.OnValidWordEntered += ValidWordEnteredHandler;
         _board.OnNewGameStarted += NewGameStartedHandler;
+
+        LoadStatistic();
     }
 
     public void Tick()
@@ -65,8 +71,7 @@ public class PlayerStatistic : IInitializable, ITickable, IDisposable
             TotalTimePlayed += MIN_TIME_BETWEEN_TIME_SAVING;
             OnTotalTimeValueChanged?.Invoke(TotalTimePlayed);
 
-            PlayerPrefs.SetFloat(TOTAL_TIME_PLAYED_KEY, TotalTimePlayed);
-            PlayerPrefs.Save();
+            PlatformBridge.Service.SaveData(TOTAL_TIME_PLAYED_KEY, TotalTimePlayed);
 
             _totalTimeSavingTimer = MIN_TIME_BETWEEN_TIME_SAVING;
         }
@@ -77,12 +82,12 @@ public class PlayerStatistic : IInitializable, ITickable, IDisposable
         _board.OnGameOver -= GameOverHandler;
         _board.OnValidWordEntered -= ValidWordEnteredHandler;
         _board.OnNewGameStarted -= NewGameStartedHandler;
+
+        SaveStatistic();
     }
 
     public void ResetProgress()
     {
-        PlayerPrefs.DeleteAll();
-
         TotalGamesPlayed = 0;
         TotalWins = 0;
         CurrentWinStreak = 0;
@@ -90,6 +95,11 @@ public class PlayerStatistic : IInitializable, ITickable, IDisposable
         TotalAttempts = 0;
         FastestSolveTime = Mathf.Infinity;
         TotalTimePlayed = 0;
+
+        OnTotalWinsValueChanged?.Invoke(0);
+        OnTotalTimeValueChanged?.Invoke(0);
+
+        SaveStatistic();
     }
 
     private void GameOverHandler(bool hasWon, string word)
@@ -134,16 +144,40 @@ public class PlayerStatistic : IInitializable, ITickable, IDisposable
         _currentAttempts = 0;
     }
 
+    private void LoadStatistic()
+    {
+        PlatformBridge.Service.LoadData(_statisticKeys, (success, values) =>
+        {
+            if (!success || values == null || values.Count < _statisticKeys.Count)
+                return;
+
+            TotalGamesPlayed = DataParser.ParseInt(values[0], 0);
+            TotalWins = DataParser.ParseInt(values[1], 0);
+            CurrentWinStreak = DataParser.ParseInt(values[2], 0);
+            BestWinStreak = DataParser.ParseInt(values[3], 0);
+            TotalAttempts = DataParser.ParseInt(values[4], 0);
+            FastestSolveTime = DataParser.ParseFloat(values[5], Mathf.Infinity);
+            TotalTimePlayed = DataParser.ParseFloat(values[6], 0f);
+
+            OnTotalWinsValueChanged?.Invoke(TotalWins);
+            OnTotalTimeValueChanged?.Invoke(TotalTimePlayed);
+            OnStatsLoaded?.Invoke();
+        });
+    }
+
     private void SaveStatistic()
     {
-        PlayerPrefs.SetInt(TOTAL_GAMES_PLAYED_KEY, TotalGamesPlayed);
-        PlayerPrefs.SetInt(TOTAL_WINS_KEY, TotalWins);
-        PlayerPrefs.SetInt(CURRENT_WIN_STREAK_KEY, CurrentWinStreak);
-        PlayerPrefs.SetInt(BEST_WIN_STREAK_KEY, BestWinStreak);
-        PlayerPrefs.SetInt(TOTAL_ATTEMPTS_KEY, TotalAttempts);
-        PlayerPrefs.SetFloat(FASTEST_SOLVE_TIME_KEY, FastestSolveTime);
-        PlayerPrefs.SetFloat(TOTAL_TIME_PLAYED_KEY, TotalTimePlayed);
+        var values = new List<object>
+        {
+            TotalGamesPlayed,
+            TotalWins,
+            CurrentWinStreak,
+            BestWinStreak,
+            TotalAttempts,
+            FastestSolveTime,
+            TotalTimePlayed
+        };
 
-        PlayerPrefs.Save();
+        PlatformBridge.Service.SaveData(_statisticKeys, values);
     }
 }

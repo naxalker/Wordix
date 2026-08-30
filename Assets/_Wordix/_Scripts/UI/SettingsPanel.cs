@@ -25,7 +25,11 @@ public class SettingsPanel : MonoBehaviour
     private void Awake()
     {
         _exitButton.onClick.AddListener(
-            () => gameObject.SetActive(false));
+            () =>
+            {
+                PlatformBridge.Service.LevelResumed();
+                gameObject.SetActive(false);
+            });
         _resetButton.onClick.AddListener(
             () => OnResetButtonClicked?.Invoke());
 

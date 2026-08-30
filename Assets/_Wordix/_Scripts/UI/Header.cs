@@ -42,7 +42,11 @@ public class Header : MonoBehaviour
 
         _helpButton.onClick.AddListener(() => _helpPanel.Show());
         _statButton.onClick.AddListener(() => _statisticPanel.Show());
-        _settingsButton.onClick.AddListener(() => _settingsPanel.gameObject.SetActive(true));
+        _settingsButton.onClick.AddListener(() =>
+        {
+            PlatformBridge.Service.LevelPaused();
+            _settingsPanel.gameObject.SetActive(true);
+        });
 
         LocalizationSettings.SelectedLocaleChanged += LocaleChangedHandler;
     }
