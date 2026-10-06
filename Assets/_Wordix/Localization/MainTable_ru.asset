@@ -63,9 +63,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 163394371194880
-    m_Localized: "{0} \u0431\u0443\u043A\u0432\u0430 - <color=#538D4E><b>{1}</b></color>"
+    m_Localized: "{0:choose(0|1|2|3|4):\u041F\u0435\u0440\u0432\u0430\u044F|\u0412\u0442\u043E\u0440\u0430\u044F|\u0422\u0440\u0435\u0442\u044C\u044F|\u0427\u0435\u0442\u0432\u0435\u0440\u0442\u0430\u044F|\u041F\u044F\u0442\u0430\u044F}
+      \u0431\u0443\u043A\u0432\u0430 - <color=#538D4E><b>{1}</b></color>"
     m_Metadata:
-      m_Items: []
+      m_Items:
+      - rid: 1428788399202107697
   references:
     version: 2
     RefIds:
@@ -76,3 +78,4 @@ MonoBehaviour:
         m_SharedEntries:
         - id: 79741142175744
         - id: 92853215956992
+        - id: 163394371194880

@@ -20,7 +20,6 @@ public class Startup : MonoBehaviour
     private async void LoadMainScene()
     {
         PlatformBridge.Service.Initialize();
-        PlatformBridge.Service.GameLoadingStarted();
 
         await LocalizationSettings.InitializationOperation.Task;
 
@@ -32,7 +31,5 @@ public class Startup : MonoBehaviour
 
         _loadOperation = Addressables.LoadSceneAsync(_mainSceneReference, LoadSceneMode.Single);
         await _loadOperation.Task;
-
-        PlatformBridge.Service.GameLoadingStopped();
     }
 }

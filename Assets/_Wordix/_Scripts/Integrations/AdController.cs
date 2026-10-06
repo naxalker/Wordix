@@ -6,6 +6,7 @@ public class AdController : IInitializable, IDisposable
     private Board _board;
     private MessagePanel _messagePanel;
     private HintButton _hintButton;
+    private bool _isFirstGame = true;
 
     public AdController(Board board, MessagePanel messagePanel, HintButton hintButton)
     {
@@ -40,6 +41,14 @@ public class AdController : IInitializable, IDisposable
     {
         if (PlatformBridge.Service.IsRewardedSupported)
             _hintButton.Enable();
+        else
+            _hintButton.Disable();
+
+        if (_isFirstGame)
+        {
+            _isFirstGame = false;
+            return;
+        }
 
         PlatformBridge.Service.ShowInterstitial();
     }

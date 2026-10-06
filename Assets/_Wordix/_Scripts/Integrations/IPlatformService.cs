@@ -5,11 +5,11 @@ public interface IPlatformService
 {
     bool IsInterstitialSupported { get; }
     bool IsRewardedSupported { get; }
+    bool IsLeaderboardSupported { get; }
+    bool IsExternalLinksAllowed { get; }
 
     void Initialize();
     void GameReady();
-    void GameLoadingStarted();
-    void GameLoadingStopped();
     void LevelStarted(string level = null);
     void LevelCompleted(string level = null);
     void LevelFailed(string level = null);
@@ -17,6 +17,8 @@ public interface IPlatformService
     void LevelResumed(string level = null);
     void ShowInterstitial();
     void ShowRewarded(Action onRewarded);
+    void SetLeaderboardScore(string leaderboardId, int score);
+    void OpenUrl(string url);
     void SaveData<T>(string key, T value, Action<bool> onComplete = null);
     void SaveData(List<string> keys, List<object> values, Action<bool> onComplete = null);
     void LoadData(string key, Action<bool, string> onComplete = null);

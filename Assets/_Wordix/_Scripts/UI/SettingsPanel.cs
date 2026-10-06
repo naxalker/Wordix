@@ -2,6 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 public class SettingsPanel : MonoBehaviour
 {
@@ -21,15 +22,18 @@ public class SettingsPanel : MonoBehaviour
     [SerializeField] private GameObject _changelLanguageWarningPanel;
 
     private int _languageIndex;
+    private PlayerInput _playerInput;
+
+    [Inject]
+    private void Construct(PlayerInput playerInput)
+    {
+        _playerInput = playerInput;
+    }
 
     private void Awake()
     {
         _exitButton.onClick.AddListener(
-            () =>
-            {
-                PlatformBridge.Service.LevelResumed();
-                gameObject.SetActive(false);
-            });
+            () => gameObject.SetActive(false));
         _resetButton.onClick.AddListener(
             () => OnResetButtonClicked?.Invoke());
 
@@ -59,6 +63,18 @@ public class SettingsPanel : MonoBehaviour
                 gameObject.SetActive(false);
             }
         );
+    }
+
+    private void OnEnable()
+    {
+        _playerInput.Block();
+        PlatformBridge.Service.LevelPaused();
+    }
+
+    private void OnDisable()
+    {
+        _playerInput.Unblock();
+        PlatformBridge.Service.LevelResumed();
     }
 
     private void OnDestroy()

@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using YG;
 
 public class ContactLink : MonoBehaviour, IPointerClickHandler
 {
@@ -8,7 +7,7 @@ public class ContactLink : MonoBehaviour, IPointerClickHandler
 
     private void Awake()
     {
-        if (YG2.platform == "CrazyGames")
+        if (!PlatformBridge.Service.IsExternalLinksAllowed)
         {
             gameObject.SetActive(false);
         }
@@ -16,7 +15,7 @@ public class ContactLink : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        YG2.OnURL(LINK);
+        PlatformBridge.Service.OpenUrl(LINK);
 #if UNITY_EDITOR
         Debug.Log("Contact link clicked");
 #endif

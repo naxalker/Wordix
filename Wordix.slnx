@@ -7,4 +7,5 @@
   <Project Path="NaughtyAttributes.Editor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Assembly-CSharp-firstpass.csproj" />
+  <Project Path="CrazyGamesDefineManager.csproj" />
 </Solution>

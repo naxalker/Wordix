@@ -1,3 +1,4 @@
+#if PLUGIN_YG_2
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -7,6 +8,10 @@ using PlayerPrefs = RedefineYG.PlayerPrefs;
 public class PluginYourGamesService : IPlatformService
 {
     public bool IsInterstitialSupported => true;
+
+    public bool IsLeaderboardSupported => true;
+
+    public bool IsExternalLinksAllowed => YG2.platform != "CrazyGames";
 
     public bool IsRewardedSupported
     {
@@ -26,10 +31,6 @@ public class PluginYourGamesService : IPlatformService
     {
         YG2.GameReadyAPI();
     }
-
-    public void GameLoadingStarted() { }
-
-    public void GameLoadingStopped() { }
 
     public void LevelStarted(string level = null)
     {
@@ -72,6 +73,16 @@ public class PluginYourGamesService : IPlatformService
 #else
         YG2.RewardedAdvShow("giveHint", onRewarded);
 #endif
+    }
+
+    public void SetLeaderboardScore(string leaderboardId, int score)
+    {
+        YG2.SetLeaderboard(leaderboardId, score);
+    }
+
+    public void OpenUrl(string url)
+    {
+        YG2.OnURL(url);
     }
 
     public void SaveData<T>(string key, T value, Action<bool> onComplete = null)
@@ -159,3 +170,4 @@ public class PluginYourGamesService : IPlatformService
         return null;
     }
 }
+#endif

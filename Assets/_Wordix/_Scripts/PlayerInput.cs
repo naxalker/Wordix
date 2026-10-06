@@ -47,6 +47,7 @@ public class PlayerInput : IInitializable, ITickable, IDisposable
 
     private KeyCode[] _supportedKeys = SUPPORTED_KEYS_RU;
     private VirtualKeyboard _activeKeyboard;
+    private int _blockersCount;
 
     private Board _board;
     private VirtualKeyboard _keyboardRU;
@@ -96,8 +97,16 @@ public class PlayerInput : IInitializable, ITickable, IDisposable
         LocalizationSettings.SelectedLocaleChanged -= LocaleChangedHandler;
     }
 
+    public void Block() => _blockersCount++;
+
+    public void Unblock() => _blockersCount--;
+
     public void Tick()
     {
+        // Time.timeScale is 0 while the platform pauses the game (ads, hidden tab).
+        if (_blockersCount > 0 || Time.timeScale == 0f)
+            return;
+
         if (Input.GetKeyDown(KeyCode.Backspace))
         {
             OnClearPressed?.Invoke();

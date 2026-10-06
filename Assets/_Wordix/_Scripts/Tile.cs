@@ -59,6 +59,9 @@ public class Tile : MonoBehaviour
 
         TileColorConfig tileConfig = _tileColors.DarkThemeValues.FirstOrDefault(tile => tile.TileState == state);
 
+        if (state == TileState.EmptyState)
+            _rectTransform.localScale = Vector3.one;
+
         if (state == TileState.EmptyState || state == TileState.OccupiedState)
         {
             _fill.color = tileConfig.FillColor;

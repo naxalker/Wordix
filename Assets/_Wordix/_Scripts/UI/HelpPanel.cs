@@ -1,10 +1,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 public class HelpPanel : MonoBehaviour
 {
     [SerializeField] private List<Button> _returnButtons;
+
+    private PlayerInput _playerInput;
+
+    [Inject]
+    private void Construct(PlayerInput playerInput)
+    {
+        _playerInput = playerInput;
+    }
 
     private void Awake()
     {
@@ -13,6 +22,10 @@ public class HelpPanel : MonoBehaviour
             button.onClick.AddListener(() => Hide());
         }
     }
+
+    private void OnEnable() => _playerInput.Block();
+
+    private void OnDisable() => _playerInput.Unblock();
 
     public void Show()
     {

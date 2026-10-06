@@ -2,7 +2,6 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
-using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -51,21 +50,11 @@ public class MessagePanel : MonoBehaviour
 
     public void ShowHintMessage()
     {
-        string[] positions_ru = { "Первая", "Вторая", "Третья", "Четвертая", "Пятая" };
-        string[] positions_en = { "First", "Second", "Third", "Forth", "Fifth" };
-
         for (int i = 0; i < _board.GuessedLettersInWord.Length; i++)
         {
             if (_board.GuessedLettersInWord[i] == '\0')
             {
-                if (LocalizationSettings.SelectedLocale.Identifier.Code == "ru")
-                {
-                    ShowLocalizedMessage(_hintStringLocalized, positions_ru[i], char.ToUpper(_board.Word[i]));
-                }
-                else
-                {
-                    ShowLocalizedMessage(_hintStringLocalized, positions_en[i], char.ToUpper(_board.Word[i]));
-                }
+                ShowLocalizedMessage(_hintStringLocalized, i, char.ToUpper(_board.Word[i]));
                 break;
             }
         }

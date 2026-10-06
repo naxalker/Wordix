@@ -58,9 +58,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 163394371194880
-    m_Localized: '{0} letter - <color=#538D4E><b>{1}</b></color>'
+    m_Localized: '{0:choose(0|1|2|3|4):First|Second|Third|Fourth|Fifth} letter -
+      <color=#538D4E><b>{1}</b></color>'
     m_Metadata:
-      m_Items: []
+      m_Items:
+      - rid: 1428788399202107692
   references:
     version: 2
     RefIds:
@@ -71,3 +73,4 @@ MonoBehaviour:
         m_SharedEntries:
         - id: 79741142175744
         - id: 92853215956992
+        - id: 163394371194880

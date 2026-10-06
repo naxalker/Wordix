@@ -1,12 +1,9 @@
 using System;
-using UnityEngine;
-using YG;
 using Zenject;
-using PlayerPrefs = RedefineYG.PlayerPrefs;
 
 public class LeaderboardController : IInitializable, IDisposable
 {
-    private const string RECORD_KEY = "Record";
+    private const string TOTAL_WINS_LEADERBOARD = "totalWins";
 
     private PlayerStatistic _playerStatistic;
     private int _record;
@@ -18,8 +15,6 @@ public class LeaderboardController : IInitializable, IDisposable
 
     public void Initialize()
     {
-        _record = PlayerPrefs.GetInt(RECORD_KEY, 0);
-
         _playerStatistic.OnTotalWinsValueChanged += TotalWinsValueChangedHandler;
     }
 
@@ -30,11 +25,12 @@ public class LeaderboardController : IInitializable, IDisposable
 
     private void TotalWinsValueChangedHandler(int winsAmount)
     {
-        if (winsAmount > _record)
-        {
-            _record = winsAmount;
-            PlayerPrefs.SetInt(RECORD_KEY, _record);
-            YG2.SetLeaderboard("totalWins", winsAmount);
-        }
+        if (winsAmount <= _record)
+            return;
+
+        _record = winsAmount;
+
+        if (PlatformBridge.Service.IsLeaderboardSupported)
+            PlatformBridge.Service.SetLeaderboardScore(TOTAL_WINS_LEADERBOARD, winsAmount);
     }
 }

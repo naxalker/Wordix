@@ -1,0 +1,32 @@
+{
+    "$schema": "https://bridge.playgama.com/v2/stable/schema.json",
+    "advertisement": {
+        "interstitial": {
+            "preloadOnStart": "next_word",
+            "placementFallback": "next_word",
+            "placements": [
+                {
+                    "id": "next_word"
+                }
+            ]
+        },
+        "rewarded": {
+            "preloadOnStart": "hint",
+            "placementFallback": "hint",
+            "placements": [
+                {
+                    "id": "hint"
+                }
+            ]
+        },
+        "useBuiltInErrorPopup": true
+    },
+    "payments": [],
+    "leaderboards": [
+        {
+            "id": "totalWins",
+            "isMain": true
+        }
+    ],
+    "sendAnalyticsEvents": true
+}

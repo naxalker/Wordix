@@ -22,15 +22,18 @@ public class StatisticPanel : MonoBehaviour
     [SerializeField] private LocalizedString _totalGamesPlayedString;
 
     private PlayerStatistic _playerStatistic;
+    private PlayerInput _playerInput;
 
     [Inject]
-    private void Construct(PlayerStatistic playerStatistic)
+    private void Construct(PlayerStatistic playerStatistic, PlayerInput playerInput)
     {
         _playerStatistic = playerStatistic;
+        _playerInput = playerInput;
     }
 
     private void OnEnable()
     {
+        _playerInput.Block();
         _playerStatistic.OnTotalTimeValueChanged += TotalTimeValueChangedHandler;
         LocalizationSettings.SelectedLocaleChanged += LocaleChangedHandler;
     }
@@ -42,6 +45,7 @@ public class StatisticPanel : MonoBehaviour
 
     private void OnDisable()
     {
+        _playerInput.Unblock();
         _playerStatistic.OnTotalTimeValueChanged -= TotalTimeValueChangedHandler;
         LocalizationSettings.SelectedLocaleChanged -= LocaleChangedHandler;
     }
@@ -115,36 +119,7 @@ public class StatisticPanel : MonoBehaviour
 
     private async Task<string> GetPlayedGamesText(int totalGames)
     {
-        string gameWord;
-
-        if (LocalizationSettings.SelectedLocale.Identifier.Code == "ru")
-        {
-            if (totalGames % 100 >= 11 && totalGames % 100 <= 19)
-            {
-                gameWord = "игр";
-            }
-            else
-            {
-                int lastDigit = totalGames % 10;
-
-                if (lastDigit == 1)
-                    gameWord = "игру";
-                else if (lastDigit >= 2 && lastDigit <= 4)
-                    gameWord = "игры";
-                else
-                    gameWord = "игр";
-            }
-        }
-        else
-        {
-            gameWord = totalGames > 1 ? "games" : "game";
-        }
-
-        _totalGamesPlayedString.Arguments = new object[]
-        {
-            totalGames,
-            gameWord
-        };
+        _totalGamesPlayedString.Arguments = new object[] { totalGames };
 
         var handle = _totalGamesPlayedString.GetLocalizedStringAsync();
 

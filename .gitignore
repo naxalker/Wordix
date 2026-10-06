@@ -83,5 +83,8 @@ crashlytics-build.properties
 /Assets/PluginYourGames.meta
 /Assets/UltimateCleanGUIPack/
 /Assets/UltimateCleanGUIPack.meta
-/Assets/WebGLTemplates/
-/Assets/WebGLTemplates.meta
+
+*.slnx
+
+.claude/settings.local.json
+CLAUDE.local.md

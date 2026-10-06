@@ -25,6 +25,8 @@ public class Board : MonoBehaviour
     private int _rowIndex;
     private int _columnIndex;
 
+    private bool _isRevealing;
+
     private PlayerInput _playerInput;
     private WordsController _wordsController;
 
@@ -66,6 +68,9 @@ public class Board : MonoBehaviour
 
     public void StartNewGame()
     {
+        StopAllCoroutines();
+        _isRevealing = false;
+
         ClearBoard();
         SetRandomWord();
 
@@ -99,14 +104,36 @@ public class Board : MonoBehaviour
 
     public void SubmitWord()
     {
-        if (!_isActive) { return; }
+        if (!_isActive || _isRevealing) { return; }
 
         Row currentRow = _rows[_rowIndex];
 
-        if (_columnIndex >= currentRow.Tiles.Length)
+        if (_columnIndex < currentRow.Tiles.Length)
+            return;
+
+        if (!IsValidWord(currentRow.Word))
         {
-            StartCoroutine(SubmitRow(currentRow));
+            currentRow.Shake();
+
+            OnInvalidWord?.Invoke();
+            return;
         }
+
+        OnValidWordEntered?.Invoke();
+
+        EvaluateRow(currentRow);
+
+        bool hasWon = HasWon(currentRow);
+
+        _rowIndex++;
+        _columnIndex = 0;
+
+        bool isGameOver = hasWon || _rowIndex >= _rows.Length;
+
+        if (isGameOver)
+            _isActive = false;
+
+        StartCoroutine(RevealRow(currentRow, isGameOver, hasWon));
     }
 
     public void RemoveLetter()
@@ -134,20 +161,8 @@ public class Board : MonoBehaviour
 #endif
     }
 
-    private IEnumerator SubmitRow(Row row)
+    private void EvaluateRow(Row row)
     {
-        if (!IsValidWord(row.Word))
-        {
-            row.Shake();
-
-            OnInvalidWord?.Invoke();
-            yield break;
-        }
-
-        _isActive = false;
-
-        OnValidWordEntered?.Invoke();
-
         string remaining = _word;
 
         for (int i = 0; i < row.Tiles.Length; i++)
@@ -188,30 +203,32 @@ public class Board : MonoBehaviour
                 }
             }
         }
+    }
+
+    private IEnumerator RevealRow(Row row, bool isGameOver, bool hasWon)
+    {
+        _isRevealing = true;
 
         foreach (Tile tile in row.Tiles)
         {
             yield return StartCoroutine(tile.Flip());
         }
 
-        if (HasWon(row))
+        _isRevealing = false;
+
+        if (!isGameOver)
+            yield break;
+
+        if (hasWon)
         {
             PlatformBridge.Service.LevelCompleted();
             OnGameOver?.Invoke(true, _word);
         }
         else
         {
-            _rowIndex++;
-            _columnIndex = 0;
-
-            if (_rowIndex >= _rows.Length)
-            {
-                PlatformBridge.Service.LevelFailed();
-                OnGameOver?.Invoke(false, _word);
-            }
+            PlatformBridge.Service.LevelFailed();
+            OnGameOver?.Invoke(false, _word);
         }
-
-        _isActive = true;
     }
 
     private void ClearBoard()

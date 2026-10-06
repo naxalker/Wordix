@@ -1,36 +1,41 @@
+#if PLAYGAMA
 using Playgama;
 using Playgama.Modules.Advertisement;
+using Playgama.Modules.Leaderboards;
 using Playgama.Modules.Platform;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using static UnityEditor.Progress;
 
 public class PlaygamaService : IPlatformService
 {
+    private readonly HashSet<string> _savesInProgress = new();
+    private readonly Dictionary<string, (List<string> keys, List<object> values, Action<bool> onComplete)> _pendingSaves = new();
+
     private Action _onRewarded;
+    private EventSystem _pausedEventSystem;
 
     public bool IsInterstitialSupported => Bridge.advertisement.isInterstitialSupported;
 
     public bool IsRewardedSupported => Bridge.advertisement.isRewardedSupported;
+
+    public bool IsLeaderboardSupported => Bridge.leaderboards.type != LeaderboardType.NotAvailable;
+
+    public bool IsExternalLinksAllowed => Bridge.platform.isExternalLinksAllowed;
 
     public void Initialize()
     {
         Bridge.advertisement.rewardedStateChanged += RewardedStateChangedHandler;
         Bridge.platform.audioStateChanged += AudioStateChangedHandler;
         Bridge.platform.pauseStateChanged += PauseStateChangedHandler;
+
+        AudioStateChangedHandler(Bridge.platform.isAudioEnabled);
     }
 
     public void GameReady()
         => Bridge.platform.SendMessage(PlatformMessage.GameReady);
-
-    public void GameLoadingStarted()
-        => Bridge.platform.SendMessage(PlatformMessage.InGameLoadingStarted);
-
-    public void GameLoadingStopped()
-        => Bridge.platform.SendMessage(PlatformMessage.InGameLoadingStopped);
 
     public void LevelStarted(string level = null)
     {
@@ -65,7 +70,7 @@ public class PlaygamaService : IPlatformService
     public void ShowInterstitial()
     {
         if (Bridge.advertisement.isInterstitialSupported)
-            Bridge.advertisement.ShowInterstitial();
+            Bridge.advertisement.ShowInterstitial("next_word");
     }
 
     public void ShowRewarded(Action onRewarded)
@@ -74,18 +79,26 @@ public class PlaygamaService : IPlatformService
         Bridge.advertisement.ShowRewarded("hint");
     }
 
+    public void SetLeaderboardScore(string leaderboardId, int score)
+    {
+        Bridge.leaderboards.SetScore(leaderboardId, score);
+    }
+
+    public void OpenUrl(string url)
+    {
+        Application.OpenURL(url);
+    }
+
     public string GetLanguage() => Bridge.platform.language;
 
     public void SaveData<T>(string key, T value, Action<bool> onComplete = null)
     {
-        string stringValue = Convert.ToString(value, CultureInfo.InvariantCulture);
-
-        Bridge.storage.Set(key, stringValue, onComplete);
+        Save(new List<string> { key }, new List<object> { ToInvariantString(value) }, onComplete);
     }
 
     public void SaveData(List<string> keys, List<object> values, Action<bool> onComplete = null)
     {
-        Bridge.storage.Set(keys, values, onComplete);
+        Save(keys, values.ConvertAll(ToInvariantString), onComplete);
     }
 
     public void LoadData(string key, Action<bool, string> onComplete = null)
@@ -97,6 +110,36 @@ public class PlaygamaService : IPlatformService
     {
         Bridge.storage.Get(keys, onComplete);
     }
+
+    // Bridge.storage ignores a new value while a save for the same keys is in progress, so the latest one is resent afterwards.
+    private void Save(List<string> keys, List<object> values, Action<bool> onComplete)
+    {
+        // Bridge is already destroyed when the application is quitting.
+        if (Bridge.instance == null)
+            return;
+
+        string saveKey = string.Join("|", keys);
+
+        if (!_savesInProgress.Add(saveKey))
+        {
+            if (_pendingSaves.TryGetValue(saveKey, out var pending))
+                onComplete = pending.onComplete + onComplete;
+
+            _pendingSaves[saveKey] = (keys, values, onComplete);
+            return;
+        }
+
+        Bridge.storage.Set(keys, values, success =>
+        {
+            _savesInProgress.Remove(saveKey);
+            onComplete?.Invoke(success);
+
+            if (_pendingSaves.Remove(saveKey, out var pending))
+                Save(pending.keys, pending.values, pending.onComplete);
+        });
+    }
+
+    private static object ToInvariantString(object value) => Convert.ToString(value, CultureInfo.InvariantCulture);
 
     private void RewardedStateChangedHandler(RewardedState state)
     {
@@ -116,12 +159,24 @@ public class PlaygamaService : IPlatformService
         if (isPaused)
         {
             Time.timeScale = 0;
-            EventSystem.current.enabled = false;
+
+            // EventSystem.current becomes null once the EventSystem is disabled, so keep the reference to re-enable it.
+            if (EventSystem.current != null)
+            {
+                _pausedEventSystem = EventSystem.current;
+                _pausedEventSystem.enabled = false;
+            }
         }
         else
         {
             Time.timeScale = 1;
-            EventSystem.current.enabled = true;
+
+            if (_pausedEventSystem != null)
+            {
+                _pausedEventSystem.enabled = true;
+                _pausedEventSystem = null;
+            }
         }
     }
 }
+#endif

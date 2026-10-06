@@ -48,7 +48,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1098286108672
-    m_Localized: You have played <b>{0} {1}</b> so far
+    m_Localized: You have played <b>{0} {0:plural:game|games}</b> so far
     m_Metadata:
       m_Items:
       - rid: 1428788399202107711
