@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditor.Build;
 using YG;
 using YG.EditorScr;
+using YG.Insides;
 
 public static class PlatformSwitcher
 {
@@ -12,34 +13,69 @@ public static class PlatformSwitcher
     private const string PLUGIN_YG_DEFINE = "PLUGIN_YG_2";
     private const string PLAYGAMA_TEMPLATE = "PROJECT:Bridge";
 
-    public static bool IsPlaygama => GetDefines().Contains(PLAYGAMA_DEFINE);
-    public static bool IsPluginYourGames => GetDefines().Contains(PLUGIN_YG_DEFINE);
+    // InfoYG.SetPlatform excludes the SDKs of all platforms except the selected one from compilation.
+    private const string NO_PLUGIN_YOUR_GAMES_PLATFORM = "None";
 
-    public static void SwitchToPlaygama()
+    public static bool IsActive(PlatformBuildProfile profile)
+    {
+        string[] defines = GetDefines();
+
+        return profile.Sdk switch
+        {
+            PlatformSdk.Playgama => defines.Contains(PLAYGAMA_DEFINE),
+            PlatformSdk.PluginYourGames => defines.Contains(PLUGIN_YG_DEFINE)
+                                           && InfoYG.Inst().Basic.platform == profile.PluginYourGamesPlatform,
+            _ => false,
+        };
+    }
+
+    public static void Switch(PlatformBuildProfile profile)
     {
         SwitchToWebGL();
-        SetPluginYourGamesActive(false);
+
+        if (profile.Sdk == PlatformSdk.Playgama)
+            SwitchToPlaygama();
+        else
+            SwitchToPluginYourGames(profile.PluginYourGamesPlatform);
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+    }
+
+    private static void SwitchToPlaygama()
+    {
+        InfoYG info = InfoYG.Inst();
+        info.Basic.platform = null;
+        // PluginYourGames always compiles and re-adds its defines on every project change while autoDefineSymbols is on.
+        info.Basic.autoDefineSymbols = false;
+        info.Basic.archivingBuild = false;
+        SaveInfo(info);
+
+        DefineSymbols.RefreshAutoDefineSubscription();
+        InfoYG.SetPlatform(NO_PLUGIN_YOUR_GAMES_PLATFORM);
+
         SetDefines(GetDefines().Where(d => !IsPluginYourGamesDefine(d)).Append(PLAYGAMA_DEFINE).Distinct());
         PlayerSettings.WebGL.template = PLAYGAMA_TEMPLATE;
     }
 
-    public static void SwitchToPluginYourGames()
+    private static void SwitchToPluginYourGames(PlatformSettings platform)
     {
-        SwitchToWebGL();
         SetDefines(GetDefines().Where(d => d != PLAYGAMA_DEFINE));
-        SetPluginYourGamesActive(true);
-    }
 
-    // PluginYourGames always compiles and re-adds its defines on every project change while autoDefineSymbols is on.
-    private static void SetPluginYourGamesActive(bool isActive)
-    {
         InfoYG info = InfoYG.Inst();
-        info.Basic.autoDefineSymbols = isActive;
-        info.Basic.archivingBuild = isActive;
-        EditorUtility.SetDirty(info);
-        AssetDatabase.SaveAssetIfDirty(info);
+        info.Basic.platform = platform;
+        info.Basic.autoDefineSymbols = true;
+        SaveInfo(info);
 
         DefineSymbols.RefreshAutoDefineSubscription();
+        DefineSymbols.UpdateDefineSymbols();
+        platform.ApplyProjectSettings();
+    }
+
+    private static void SaveInfo(InfoYG info)
+    {
+        EditorUtility.SetDirty(info);
+        AssetDatabase.SaveAssetIfDirty(info);
     }
 
     private static bool IsPluginYourGamesDefine(string define)

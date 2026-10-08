@@ -28,13 +28,14 @@ public class AdController : IInitializable, IDisposable
 
     private void ShowRewardedAd()
     {
-        PlatformBridge.Service.ShowRewarded(() =>
-        {
-            _messagePanel.ShowHintMessage();
+        PlatformBridge.Service.ShowRewarded(
+            () =>
+            {
+                _messagePanel.ShowHintMessage();
 
-            _hintButton.Disable();
-        });
-
+                _hintButton.Disable();
+            },
+            _messagePanel.ShowAdUnavailableMessage);
     }
 
     private void NewGameStartedHandler()

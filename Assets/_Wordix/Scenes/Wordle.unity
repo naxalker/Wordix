@@ -730,6 +730,15 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
+  _adUnavailableLocalized:
+    m_TableReference:
+      m_TableCollectionName: GUID:69ff9bbcfaf597146b90c13f0b24bb86
+    m_TableEntryReference:
+      m_KeyId: 170323014362128384
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   _board: {fileID: 1560146682}
   _messageText: {fileID: 586998020}
   _nextWordButton: {fileID: 1553841635}

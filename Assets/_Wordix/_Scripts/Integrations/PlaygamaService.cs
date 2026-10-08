@@ -25,13 +25,15 @@ public class PlaygamaService : IPlatformService
 
     public bool IsExternalLinksAllowed => Bridge.platform.isExternalLinksAllowed;
 
-    public void Initialize()
+    public void Initialize(Action onInitialized)
     {
         Bridge.advertisement.rewardedStateChanged += RewardedStateChangedHandler;
         Bridge.platform.audioStateChanged += AudioStateChangedHandler;
         Bridge.platform.pauseStateChanged += PauseStateChangedHandler;
 
         AudioStateChangedHandler(Bridge.platform.isAudioEnabled);
+
+        onInitialized?.Invoke();
     }
 
     public void GameReady()
@@ -73,7 +75,8 @@ public class PlaygamaService : IPlatformService
             Bridge.advertisement.ShowInterstitial("next_word");
     }
 
-    public void ShowRewarded(Action onRewarded)
+    // Failures are reported by Bridge itself (useBuiltInErrorPopup in playgama-bridge-config.json).
+    public void ShowRewarded(Action onRewarded, Action onFailed)
     {
         _onRewarded = onRewarded;
         Bridge.advertisement.ShowRewarded("hint");

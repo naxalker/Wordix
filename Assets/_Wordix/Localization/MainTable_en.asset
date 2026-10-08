@@ -63,6 +63,10 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 1428788399202107692
+  - m_Id: 170323014362128384
+    m_Localized: Ad is not available right now, try again later
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

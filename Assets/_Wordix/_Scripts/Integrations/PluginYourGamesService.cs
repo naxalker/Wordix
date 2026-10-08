@@ -7,24 +7,40 @@ using PlayerPrefs = RedefineYG.PlayerPrefs;
 
 public class PluginYourGamesService : IPlatformService
 {
+    private Action _onRewardedFailed;
+
     public bool IsInterstitialSupported => true;
 
+#if CrazyGamesPlatform_yg || GameDistributionPlatform_yg
+    public bool IsLeaderboardSupported => false;
+    public bool IsExternalLinksAllowed => false;
+#else
     public bool IsLeaderboardSupported => true;
+    public bool IsExternalLinksAllowed => true;
+#endif
 
-    public bool IsExternalLinksAllowed => YG2.platform != "CrazyGames";
+#if GameMonetizePlatform_yg
+    public bool IsRewardedSupported => false;
+#else
+    public bool IsRewardedSupported => true;
+#endif
 
-    public bool IsRewardedSupported
+    // Saves and environment data are available only after the platform SDK has initialized.
+    public void Initialize(Action onInitialized)
     {
-        get
+        if (YG2.isSDKEnabled)
         {
-            if (YG2.platform == "GameMonetize") return false;
-
-            return true;
+            CompleteInitialization(onInitialized);
+            return;
         }
-    }
 
-    public void Initialize()
-    {
+        void SDKDataReceivedHandler()
+        {
+            YG2.onGetSDKData -= SDKDataReceivedHandler;
+            CompleteInitialization(onInitialized);
+        }
+
+        YG2.onGetSDKData += SDKDataReceivedHandler;
     }
 
     public void GameReady()
@@ -64,13 +80,17 @@ public class PluginYourGamesService : IPlatformService
         YG2.InterstitialAdvShow();
     }
 
-    public void ShowRewarded(Action onRewarded)
+    public void ShowRewarded(Action onRewarded, Action onFailed)
     {
 #if GameMonetizePlatform_yg
         YG2.InterstitialAdvShow();
 
         onRewarded?.Invoke();
 #else
+#if CrazyGamesPlatform_yg
+        // CrazyGames forbids rewarded buttons without effect, e.g. when an ad blocker blocks the ad.
+        _onRewardedFailed = onFailed;
+#endif
         YG2.RewardedAdvShow("giveHint", onRewarded);
 #endif
     }
@@ -135,6 +155,17 @@ public class PluginYourGamesService : IPlatformService
         }
 
         onComplete?.Invoke(anyFound, results);
+    }
+
+    private void CompleteInitialization(Action onInitialized)
+    {
+        YG2.onErrorRewardedAdv += RewardedErrorHandler;
+        onInitialized?.Invoke();
+    }
+
+    private void RewardedErrorHandler()
+    {
+        _onRewardedFailed?.Invoke();
     }
 
     private void SaveSingle(string key, object value)

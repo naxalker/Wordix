@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Localization.Settings;
@@ -19,7 +20,9 @@ public class Startup : MonoBehaviour
 
     private async void LoadMainScene()
     {
-        PlatformBridge.Service.Initialize();
+        var platformInitialization = new TaskCompletionSource<bool>();
+        PlatformBridge.Service.Initialize(() => platformInitialization.TrySetResult(true));
+        await platformInitialization.Task;
 
         await LocalizationSettings.InitializationOperation.Task;
 

@@ -9,44 +9,56 @@ public class PlatformBuilder : EditorWindow
 {
     private const string BUILDS_FOLDER = "Builds";
 
+    private PlatformBuildProfile[] _profiles;
+    private int _selectedIndex;
+
     [MenuItem("Tools/Platform Builder")]
     private static void Open() => GetWindow<PlatformBuilder>("Platform Builder");
 
+    private void OnEnable() => LoadProfiles();
+
+    private void OnFocus() => LoadProfiles();
+
+    private void LoadProfiles()
+    {
+        _profiles = AssetDatabase.FindAssets($"t:{nameof(PlatformBuildProfile)}")
+            .Select(guid => AssetDatabase.LoadAssetAtPath<PlatformBuildProfile>(AssetDatabase.GUIDToAssetPath(guid)))
+            .OrderBy(profile => profile.name)
+            .ToArray();
+
+        _selectedIndex = Mathf.Clamp(_selectedIndex, 0, Mathf.Max(0, _profiles.Length - 1));
+    }
+
     private void OnGUI()
     {
-        EditorGUILayout.LabelField("Current platform", GetCurrentPlatform() ?? "None");
+        if (_profiles.Length == 0)
+        {
+            EditorGUILayout.HelpBox($"No {nameof(PlatformBuildProfile)} assets found.", MessageType.Info);
+            return;
+        }
+
+        PlatformBuildProfile activeProfile = _profiles.FirstOrDefault(PlatformSwitcher.IsActive);
+        EditorGUILayout.LabelField("Active profile", activeProfile != null ? activeProfile.name : "None");
+
+        _selectedIndex = EditorGUILayout.Popup("Profile", _selectedIndex, _profiles.Select(profile => profile.name).ToArray());
+        PlatformBuildProfile selectedProfile = _profiles[_selectedIndex];
 
         using (new EditorGUI.DisabledScope(EditorApplication.isCompiling))
         {
-            if (GUILayout.Button("Switch to Playgama"))
-                EditorApplication.delayCall += PlatformSwitcher.SwitchToPlaygama;
+            if (GUILayout.Button("Switch"))
+                EditorApplication.delayCall += () => PlatformSwitcher.Switch(selectedProfile);
 
-            if (GUILayout.Button("Switch to PluginYourGames"))
-                EditorApplication.delayCall += PlatformSwitcher.SwitchToPluginYourGames;
-
-            using (new EditorGUI.DisabledScope(GetCurrentPlatform() == null))
+            using (new EditorGUI.DisabledScope(selectedProfile != activeProfile))
             {
                 if (GUILayout.Button("Build"))
-                    EditorApplication.delayCall += Build;
+                    EditorApplication.delayCall += () => Build(selectedProfile);
             }
         }
     }
 
-    private static string GetCurrentPlatform()
+    private static void Build(PlatformBuildProfile profile)
     {
-        if (PlatformSwitcher.IsPlaygama)
-            return "Playgama";
-
-        if (PlatformSwitcher.IsPluginYourGames)
-            return "PluginYourGames";
-
-        return null;
-    }
-
-    private static void Build()
-    {
-        string platform = GetCurrentPlatform();
-        string outputFolder = Path.Combine(BUILDS_FOLDER, platform, $"{PlayerSettings.productName}_{PlayerSettings.bundleVersion}");
+        string outputFolder = Path.Combine(BUILDS_FOLDER, profile.name, $"{PlayerSettings.productName}_{PlayerSettings.bundleVersion}");
 
         var options = new BuildPlayerOptions
         {
@@ -60,8 +72,7 @@ public class PlatformBuilder : EditorWindow
         if (report.summary.result != BuildResult.Succeeded)
             return;
 
-        // PluginYourGames archives its builds itself.
-        if (!PlatformSwitcher.IsPlaygama)
+        if (!profile.ZipBuild)
         {
             EditorUtility.RevealInFinder(outputFolder);
             return;

@@ -14,6 +14,7 @@ public class MessagePanel : MonoBehaviour
     [SerializeField] private LocalizedString _invalidWordLocalized;
     [SerializeField] private LocalizedString _gameOverLoseFormatLocalized;
     [SerializeField] private LocalizedString _hintStringLocalized;
+    [SerializeField] private LocalizedString _adUnavailableLocalized;
 
     [Header("References")]
     [SerializeField] private Board _board;
@@ -58,6 +59,11 @@ public class MessagePanel : MonoBehaviour
                 break;
             }
         }
+    }
+
+    public void ShowAdUnavailableMessage()
+    {
+        ShowLocalizedMessage(_adUnavailableLocalized);
     }
 
     private async void ShowLocalizedMessage(LocalizedString localizedString, params object[] arguments)

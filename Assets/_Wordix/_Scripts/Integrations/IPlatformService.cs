@@ -8,7 +8,7 @@ public interface IPlatformService
     bool IsLeaderboardSupported { get; }
     bool IsExternalLinksAllowed { get; }
 
-    void Initialize();
+    void Initialize(Action onInitialized);
     void GameReady();
     void LevelStarted(string level = null);
     void LevelCompleted(string level = null);
@@ -16,7 +16,7 @@ public interface IPlatformService
     void LevelPaused(string level = null);
     void LevelResumed(string level = null);
     void ShowInterstitial();
-    void ShowRewarded(Action onRewarded);
+    void ShowRewarded(Action onRewarded, Action onFailed);
     void SetLeaderboardScore(string leaderboardId, int score);
     void OpenUrl(string url);
     void SaveData<T>(string key, T value, Action<bool> onComplete = null);
