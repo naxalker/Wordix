@@ -11,7 +11,7 @@ public class PluginYourGamesService : IPlatformService
 
     public bool IsInterstitialSupported => true;
 
-#if CrazyGamesPlatform_yg || GameDistributionPlatform_yg || GamePixPlatform_yg
+#if CrazyGamesPlatform_yg || GameDistributionPlatform_yg || GamePixPlatform_yg || Y8Platform_yg
     public bool IsLeaderboardSupported => false;
     public bool IsExternalLinksAllowed => false;
 #else
@@ -21,6 +21,9 @@ public class PluginYourGamesService : IPlatformService
 
 #if GameMonetizePlatform_yg
     public bool IsRewardedSupported => false;
+#elif Y8Platform_yg
+    // Without the Y8 SDK the module silently ignores ad calls.
+    public bool IsRewardedSupported => YG2.infoYG.platformInfo.y8EnableSDK;
 #else
     public bool IsRewardedSupported => true;
 #endif
