@@ -25,6 +25,8 @@
             -ms-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -ms-touch-action: none;
+            touch-action: none;
             height: 100%;
         }
     </style>
@@ -120,14 +122,10 @@
     });
 
     document.addEventListener('contextmenu', event => event.preventDefault());
+    // GamePix: pause only via the Page Visibility API, clicks outside the iframe must not stop the game.
     document.addEventListener('visibilitychange', () => SetVisibility(!document.hidden));
-    window.addEventListener('blur', () => SetVisibility(false));
-    window.addEventListener('focus', () => SetVisibility(true));
 
-    window.addEventListener('pointerdown', () => {
-        FocusGame();
-        SetVisibility(true);
-    });
+    window.addEventListener('pointerdown', () => FocusGame());
 
     function InstallBlurFocusBlocker() {
         if (!('onblur' in document)) return;
@@ -195,6 +193,8 @@
                 progressBarFull.style.width = `${100 * adjustedProgress}%`;
             }).then((unityInstance) => {
                 ygGameInstance = unityInstance;
+                // InitGame() is called only by the Yandex Games jslib.
+                initGame = true;
                 loadingCover.style.background = "";
                 loadingCover.style.display = "none";
                 // Fill Background [Build Modify]

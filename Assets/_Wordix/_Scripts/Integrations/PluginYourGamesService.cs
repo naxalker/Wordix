@@ -11,7 +11,7 @@ public class PluginYourGamesService : IPlatformService
 
     public bool IsInterstitialSupported => true;
 
-#if CrazyGamesPlatform_yg || GameDistributionPlatform_yg
+#if CrazyGamesPlatform_yg || GameDistributionPlatform_yg || GamePixPlatform_yg
     public bool IsLeaderboardSupported => false;
     public bool IsExternalLinksAllowed => false;
 #else
